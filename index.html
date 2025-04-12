@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rizwan Work - Air Quality Monitor</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- Firebase Modular SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <span class="logo-icon"><i class="fas fa-leaf"></i></span>
+            <div class="logo-text">
+              <h1>Rizwan Work</h1>
+              <p>Air Quality Monitor</p>
+            </div>
+          </div>
+        </div>
+
+        <nav class="sidebar-menu">
+          <ul>
+            <li class="active">
+              <a href="#" data-menu="dashboard"
+                ><i class="fas fa-home"></i>Dashboard</a
+              >
+            </li>
+            <li>
+              <a href="#" data-menu="analytics"
+                ><i class="fas fa-chart-line"></i>Analytics</a
+              >
+            </li>
+            <li>
+              <a href="#" data-menu="history"
+                ><i class="fas fa-history"></i>History</a
+              >
+            </li>
+            <li>
+              <a href="#" data-menu="settings"
+                ><i class="fas fa-cog"></i>Settings</a
+              >
+            </li>
+          </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="update-info">
+            <i class="fas fa-sync-alt"></i>
+            <span>Last updated: <span id="update-time">Updating...</span></span>
+          </div>
+          <div class="author-info">
+            <p>Created by</p>
+            <span class="authors">Rizwan, Haider & Anshika</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main">
+        <header class="main-header">
+          <div class="page-title">
+            <h2>Air Quality Dashboard</h2>
+            <p>Real-time environmental monitoring</p>
+          </div>
+          <div class="header-info">
+            <div class="date-display">
+              <i class="far fa-calendar-alt"></i>
+              <span id="current-date">April 12, 2025</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <div class="dashboard-view">
+          <!-- Node Information Section -->
+          <section class="node-info-section">
+            <div class="section-title">
+              <h3><i class="fas fa-microchip"></i>Monitoring Nodes</h3>
+            </div>
+
+            <div class="node-grid">
+              <!-- Node A Card -->
+              <div class="node-card" id="nodeA-card">
+                <div class="node-header">
+                  <h4><i class="fas fa-sensor"></i> Node A</h4>
+                  <div class="node-status" id="nodeA-status">Online</div>
+                </div>
+                <div class="node-aqi">
+                  <div class="aqi-value" id="nodeA-aqi-value">--</div>
+                  <div class="aqi-label" id="nodeA-aqi-label">Calculating</div>
+                </div>
+                <div class="node-actions">
+                  <button
+                    class="node-action-btn"
+                    data-node="nodeA"
+                    data-action="focus"
+                  >
+                    <i class="fas fa-eye"></i> Focus
+                  </button>
+                  <button
+                    class="node-action-btn"
+                    data-node="nodeA"
+                    data-action="history"
+                  >
+                    <i class="fas fa-history"></i> History
+                  </button>
+                </div>
+              </div>
+
+              <!-- Node B Card -->
+              <div class="node-card" id="nodeB-card">
+                <div class="node-header">
+                  <h4><i class="fas fa-sensor"></i> Node B</h4>
+                  <div class="node-status" id="nodeB-status">Online</div>
+                </div>
+                <div class="node-aqi">
+                  <div class="aqi-value" id="nodeB-aqi-value">--</div>
+                  <div class="aqi-label" id="nodeB-aqi-label">Calculating</div>
+                </div>
+                <div class="node-actions">
+                  <button
+                    class="node-action-btn"
+                    data-node="nodeB"
+                    data-action="focus"
+                  >
+                    <i class="fas fa-eye"></i> Focus
+                  </button>
+                  <button
+                    class="node-action-btn"
+                    data-node="nodeB"
+                    data-action="history"
+                  >
+                    <i class="fas fa-history"></i> History
+                  </button>
+                </div>
+              </div>
+
+              <!-- View Selection -->
+              <div class="view-controls">
+                <button class="view-btn active" data-view="all">
+                  <i class="fas fa-layer-group"></i> Both Nodes
+                </button>
+                <button class="view-btn" data-view="compare">
+                  <i class="fas fa-exchange-alt"></i> Compare
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Current Air Quality Section -->
+          <section class="air-quality-section">
+            <div class="section-title">
+              <h3><i class="fas fa-wind"></i>Current Air Quality</h3>
+            </div>
+
+            <div class="loading-indicator" id="loading-indicator">
+              <div class="spinner"></div>
+              <p>Loading air quality data...</p>
+            </div>
+
+            <div class="readings-grid" id="data-container">
+              <!-- Current readings will be inserted here -->
+            </div>
+          </section>
+
+          <!-- Air Quality Summary -->
+          <section class="summary-section">
+            <div class="summary-grid">
+              <!-- AQI Summary Card -->
+              <div class="summary-card aqi-summary">
+                <div class="card-header">
+                  <h3><i class="fas fa-chart-pie"></i>Air Quality Index</h3>
+                </div>
+                <div class="aqi-content">
+                  <div class="aqi-meter">
+                    <svg viewBox="0 0 120 120" class="gauge">
+                      <circle cx="60" cy="60" r="54" class="gauge-bg" />
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="54"
+                        class="gauge-value"
+                        id="aqi-circle"
+                      />
+                      <text x="60" y="55" class="gauge-number" id="aqi-value">
+                        --
+                      </text>
+                      <text x="60" y="75" class="gauge-label" id="aqi-label">
+                        Calculating
+                      </text>
+                    </svg>
+                  </div>
+                  <div class="aqi-details">
+                    <h4>Status</h4>
+                    <p id="aqi-description">Analyzing air quality data...</p>
+                    <div class="aqi-advice" id="aqi-advice">
+                      Waiting for sensor readings...
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pollutants Card -->
+              <div class="summary-card pollutants-summary">
+                <div class="card-header">
+                  <h3><i class="fas fa-smog"></i>Pollutant Levels</h3>
+                </div>
+                <div class="pollutants-content">
+                  <!-- CO2 Meter -->
+                  <div class="pollutant-item">
+                    <div class="pollutant-info">
+                      <div class="pollutant-icon co2">
+                        <i class="fas fa-cloud"></i>
+                      </div>
+                      <div class="pollutant-details">
+                        <h4>Carbon Dioxide</h4>
+                        <p id="co2-value">-- ppm</p>
+                      </div>
+                    </div>
+                    <div class="pollutant-meter">
+                      <div class="meter">
+                        <div class="meter-fill" id="co2-meter"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Methane Meter -->
+                  <div class="pollutant-item">
+                    <div class="pollutant-info">
+                      <div class="pollutant-icon methane">
+                        <i class="fas fa-fire"></i>
+                      </div>
+                      <div class="pollutant-details">
+                        <h4>Methane</h4>
+                        <p id="methane-value">-- ppm</p>
+                      </div>
+                    </div>
+                    <div class="pollutant-meter">
+                      <div class="meter">
+                        <div class="meter-fill" id="methane-meter"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Charts Section -->
+          <section class="charts-section">
+            <div class="charts-grid">
+              <!-- Temperature & Humidity Chart -->
+              <div class="chart-card">
+                <div class="card-header">
+                  <h3>
+                    <i class="fas fa-temperature-high"></i>Temperature &
+                    Humidity
+                  </h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="envChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Pollutants History Chart -->
+              <div class="chart-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-chart-line"></i>Pollutants History</h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="historyChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Analytics View (Initially Hidden) -->
+        <div class="analytics-view" style="display: none">
+          <section class="analytics-section">
+            <div class="section-title">
+              <h3><i class="fas fa-chart-line"></i>Analytics</h3>
+            </div>
+            <div class="analytics-container">
+              <div class="placeholder-content">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Advanced Analytics</h3>
+                <p>
+                  This section will contain detailed trend analysis and
+                  forecasting tools.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- History View (Initially Hidden) -->
+        <div class="history-view" style="display: none">
+          <section class="history-section">
+            <div class="section-title">
+              <h3><i class="fas fa-history"></i>Historical Data Comparison</h3>
+            </div>
+
+            <div class="history-controls">
+              <div class="time-range-selector">
+                <button class="time-btn active" data-range="day">
+                  24 Hours
+                </button>
+                <button class="time-btn" data-range="week">Week</button>
+                <button class="time-btn" data-range="month">Month</button>
+              </div>
+
+              <div class="node-selector">
+                <button class="node-select-btn active" data-nodes="both">
+                  Both Nodes
+                </button>
+                <button class="node-select-btn" data-nodes="nodeA">
+                  Node A
+                </button>
+                <button class="node-select-btn" data-nodes="nodeB">
+                  Node B
+                </button>
+              </div>
+            </div>
+
+            <div class="history-charts">
+              <!-- Temperature & Humidity Chart -->
+              <div class="chart-card">
+                <div class="card-header">
+                  <h3>
+                    <i class="fas fa-temperature-high"></i>Temperature &
+                    Humidity
+                  </h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="historyEnvChart"></canvas>
+                </div>
+              </div>
+
+              <!-- CO2 Chart -->
+              <div class="chart-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-cloud"></i>Carbon Dioxide (ppm)</h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="historyCO2Chart"></canvas>
+                </div>
+              </div>
+
+              <!-- Methane Chart -->
+              <div class="chart-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-fire"></i>Methane (ppm)</h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="historyMethaneChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Statistics Summary -->
+              <div class="stats-card">
+                <div class="card-header">
+                  <h3><i class="fas fa-chart-bar"></i>Comparison Summary</h3>
+                </div>
+                <div class="stats-container" id="comparison-stats">
+                  <!-- Will be filled with JavaScript -->
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Settings View (Initially Hidden) -->
+        <div class="settings-view" style="display: none">
+          <section class="settings-section">
+            <div class="section-title">
+              <h3><i class="fas fa-cog"></i>System Settings</h3>
+            </div>
+            <div class="settings-container">
+              <div class="placeholder-content">
+                <i class="fas fa-sliders-h"></i>
+                <h3>Configuration Options</h3>
+                <p>
+                  This section will contain system preferences and alert
+                  settings.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="main-footer">
+          <p>
+            &copy; 2025 Rizwan Work Air Quality Monitor. All rights reserved.
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
